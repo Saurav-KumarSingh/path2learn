@@ -6,7 +6,7 @@ import { MdSearch } from "react-icons/md";
 const Hero = () => {
   return (
     <>
-    <div className="z-10 w-full max-w-2xl px-6 py-24 flex flex-col items-center">
+    <div className="z-50 w-full max-w-2xl px-6 py-24 flex flex-col items-center">
         <motion.h1
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
