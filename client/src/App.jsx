@@ -4,6 +4,7 @@ import SignupForm from './components/Signup'
 import VerifyEmail from './components/VerifyEmail'
 import Login from './components/Login'
 import LogoutButton from './components/Logout'
+import NotFound from './components/NotFound'
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<LogoutButton />} />
         <Route path="/home" element={<Home />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
   )
