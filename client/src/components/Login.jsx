@@ -1,59 +1,46 @@
 import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser, getCurrentUser } from "../redux/authSlice";
 import InputField from "./InputField";
-import { client } from "../appwrite/config";
-import { Account } from "appwrite";
-
-const account = new Account(client);
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { user, loading, error } = useSelector((state) => state.auth);
+
   const [form, setForm] = useState({ email: "", password: "" });
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
 
-  // Check if a user session already exists
   useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const user = await account.get(); // Throws error if no active session
-        if (user.emailVerification) {
-          // Redirect to home if session exists and email is verified
-          window.location.href = "/home";
-        }
-      } catch (err) {
-        // No active session; stay on login page
-        console.log("No active session:", err.message);
-      }
-    };
+    dispatch(getCurrentUser());
+  }, [dispatch]);
 
-    checkSession();
-  }, []);
+  useEffect(() => {
+    if (user && user.emailVerification) {
+      navigate("/home");
+    }
+  }, [user, navigate]);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
-    setLoading(true);
 
     try {
-      // Create session
-      await account.createEmailPasswordSession(form.email, form.password);
+      await dispatch(
+        loginUser({ email: form.email, password: form.password })
+      ).unwrap();
 
-      // Get user info
-      const user = await account.get();
-
-      // Check verification
-      if (!user.emailVerification) {
-        await account.deleteSession("current");
+      // Email verification check
+      if (!user?.emailVerification) {
         throw new Error("Please verify your email before logging in.");
       }
 
-      // Redirect to home
-      window.location.href = "/home";
+      navigate("/home");
     } catch (err) {
-      setError(err.message || "Login failed");
-    } finally {
-      setLoading(false);
+      console.error("Login failed:", err);
     }
   };
 
@@ -100,10 +87,13 @@ const Login = () => {
         </button>
 
         <p className="text-sm text-center text-gray-400">
-          Don’t have an account?{" "}
-          <a href="/register" className="text-[var(--color-orange)] hover:underline">
-            Sign Up
-          </a>
+          {" Don’t have an account? "}
+          <Link
+            to="/register"
+            className="text-[var(--color-orange)] hover:underline"
+          >
+            Login
+          </Link>
         </p>
       </form>
     </div>
